@@ -1,10 +1,22 @@
+import datetime
+import sys
 from collections import Counter
 from os import path
 
 import pandas as pd
 import numpy as np
 
-from util import clean_document, load_configuration
+from util import clean_document, load_configuration, plot_loss, plot_accuracy, save_model
+from dl_tensor_board import TrainValTensorBoard
+
+out_file_name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
+
+if len(sys.argv) > 1:
+    out_file_name = sys.argv[1]
+if len(sys.argv) > 2:
+    gpus_number = int(sys.argv[2])
+else:
+    gpus_number = 1
 
 configuration = load_configuration()
 
@@ -65,8 +77,12 @@ data_test['padded_vectorized_text'] = data_test['vectorized_text'].apply(
 )
 
 # Prepare splits
+from sklearn.utils import shuffle
 
 val_elems = int(len(data_train) * configuration['data']['val_split'])
+
+data_train = shuffle(data_train)
+data_test = shuffle(data_test)
 
 val_X, val_y = data_train.iloc[: val_elems]['padded_vectorized_text'],\
                 data_train.iloc[: val_elems]['label']
@@ -106,7 +122,6 @@ model.add(Dense(len(train_y.unique())))
 # Train
 
 from keras.utils.np_utils import to_categorical
-# import ipdb; ipdb.set_trace()
 
 Optimizer = eval(configuration['optimizer'])
 optimizer = Optimizer(lr=configuration['lr'])
@@ -115,12 +130,14 @@ model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['ac
 epochs = configuration['epochs']
 batch_size = configuration['batch_size']
 
-
-model.fit(np.stack(train_X), to_categorical(train_y),
+tensorboard_callback = TrainValTensorBoard(log_dir=path.join('./out/', out_file_name, 'tensorboard.log'))
+history = model.fit(np.stack(train_X), to_categorical(train_y),
             batch_size=batch_size,
             epochs=epochs,
-            validation_data=(np.stack(val_X.values), to_categorical(val_y))
+            validation_data=(np.stack(val_X.values), to_categorical(val_y)),
+#            callbacks=[tensorboard_callback]
 )
+
 
 # Score
 from sklearn.metrics import confusion_matrix, classification_report
@@ -150,3 +167,7 @@ print('-'*40)
 print(classification_report(test_y, test_pred))
 print()
 print("Ending:", time.ctime())
+
+plot_accuracy(history, path.join('./result/', out_file_name))
+plot_loss(history, path.join('./result/', out_file_name))
+save_model(model, path.join('./out/', out_file_name))
