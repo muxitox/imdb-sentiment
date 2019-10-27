@@ -138,7 +138,12 @@ test_pred = model.predict_classes(np.stack(test_X))
 print()
 print('Confusion Matrix')
 print('-'*20)
-print(confusion_matrix(test_y, test_pred))
+print(
+    pd.DataFrame(
+        confusion_matrix(test_y, test_pred),
+        index=train_y.unique(), columns=train_y.unique()
+    )
+)
 print()
 print('Classification Report')
 print('-'*40)
