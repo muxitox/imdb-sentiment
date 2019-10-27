@@ -1,0 +1,24 @@
+data:
+    folder: ./data/
+    file_train: imdb_train.csv
+    file_test: imdb_test.csv
+    val_split: 0.1
+
+embedding:
+    n_word: 200
+    size: 20
+
+rnn:
+    type: LSTM # LSTM, GRU, SimpleRNN
+    bidirectional: True
+    n_layers: 1
+    neurons:
+        - 64
+    dropout: 0.4
+
+dropout: 0 # dropout in fully connected
+
+lr: 0.01
+epochs: 1
+batch_size: 10
+optimizer: SGD # SGD, RMSprop, Adagrad, adam
