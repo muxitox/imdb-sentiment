@@ -1,0 +1,26 @@
+data:
+    folder: ./data/
+    file_train: imdb_train.csv
+    file_test: imdb_test.csv
+    val_split: 0.3
+
+embedding:
+    glove_path: ./glove.6B/glove.6B.100d.txt
+    max_sequence_length: 1000
+    max_num_words: 20000
+    dimension: 100
+
+rnn:
+    type: GRU # LSTM, GRU, SimpleRNN
+    bidirectional: True
+    n_layers: 1
+    neurons:
+        - 32
+    dropout: 0.2
+
+dropout: 0 # dropout in fully connected
+
+lr: 0.01
+epochs: 10
+batch_size: 150
+optimizer: adam # SGD, RMSprop, Adagrad, adam
