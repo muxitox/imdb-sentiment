@@ -13,6 +13,7 @@ keras = "*"
 tensorflow = "*"
 sklearn = "*"
 matplotlib = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.6"

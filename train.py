@@ -77,17 +77,21 @@ data_test['padded_vectorized_text'] = data_test['vectorized_text'].apply(
 )
 
 # Prepare splits
-from sklearn.utils import shuffle
+from sklearn.model_selection import StratifiedShuffleSplit
 
-val_elems = int(len(data_train) * configuration['data']['val_split'])
+train_idx, val_idx = next(StratifiedShuffleSplit(
+                                n_splits=1,
+                                test_size=configuration['data']['val_split']
+                            ).split(
+                                data_train['padded_vectorized_text'],
+                                data_train['label']
+                            )
+                        )
 
-data_train = shuffle(data_train)
-data_test = shuffle(data_test)
-
-val_X, val_y = data_train.iloc[: val_elems]['padded_vectorized_text'],\
-                data_train.iloc[: val_elems]['label']
-train_X, train_y = data_train.iloc[val_elems :]['padded_vectorized_text'],\
-                data_train.iloc[val_elems :]['label']
+val_X, val_y = data_train.iloc[val_idx]['padded_vectorized_text'],\
+                data_train.iloc[val_idx]['label']
+train_X, train_y = data_train.iloc[train_idx]['padded_vectorized_text'],\
+                data_train.iloc[train_idx]['label']
 test_X, test_y = data_test['padded_vectorized_text'],\
                 data_test['label']
 
